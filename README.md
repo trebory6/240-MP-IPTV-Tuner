@@ -1,3 +1,28 @@
+## Fork Note:
+
+This fork is being used to plan and develop an experimental **IPTV Tuner** module for 240-MP.
+
+The goal is to bring live IPTV playback into the same retro VCR-style frontend, with support for M3U playlists, XMLTV guide data, channel browsing, MPV playback, and a CRT-friendly program guide that feels like something from a 1990s cable TV interface.
+
+This is a personal roadmap and prototype unless it is later accepted into the main 240-MP project.
+
+## IPTV Tuner Roadmap
+
+Development is currently focused on compatibility with [ErsatzTV Legacy](https://github.com/ErsatzTV/legacy), specifically its M3U playlist and XMLTV EPG output. Compatibility with other IPTV sources is not guaranteed at this time.
+
+Planned features:
+
+* M3U playlist and XMLTV EPG integration
+* Live IPTV channel playback
+* A Prevue Channel / TV Guide Channel-inspired EPG view
+* Passive scrolling or interactive selection modes for the guide
+* Theme support for the guide interface
+* A possible retro Weather Channel-inspired screen using RetroCast or a custom weather template
+* Remote control-friendly navigation
+* Analog-style channel transitions
+
+-----
+
 <img src="https://github.com/user-attachments/assets/73c3e46f-a74a-4d96-9c4f-ae30f28378be" />
 
 # 240-MP
