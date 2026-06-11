@@ -29,6 +29,7 @@ FocusScope {
 
     function navigateBack() {
         if (navStack.length === 0) {
+            iptvTunerBackend.stopVirtualChannelClock()
             moduleRoot.goBack()
             return
         }
@@ -71,6 +72,7 @@ FocusScope {
             navigateTo("Setup.qml", {})
             return
         }
+        iptvTunerBackend.startVirtualChannelClock()
         iptvTunerBackend.loadGuide()
         navigateTo("Tuner.qml", {
             startupChannel: iptvTunerBackend.startupChannelNumber()

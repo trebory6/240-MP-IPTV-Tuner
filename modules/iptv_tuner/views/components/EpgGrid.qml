@@ -6,6 +6,7 @@ FocusScope {
     property var programmes: []
     property var theme: ({})
     property bool interactive: false
+    property int scrollIntervalMs: 3000
     property int focusRow: 0
     property int focusCol: 0
     property int scrollOffset: 0
@@ -115,17 +116,30 @@ FocusScope {
         }
     }
 
+    function syncGuideRow() {
+        focusRow = iptvTunerBackend.computeGuideRow()
+        channelList.currentIndex = focusRow
+        progList.currentIndex = focusRow
+        channelList.positionViewAtIndex(focusRow, ListView.Contain)
+        progList.positionViewAtIndex(focusRow, ListView.Contain)
+    }
+
     Timer {
         id: passiveScroll
         running: !interactive && channels.length > 0
-        interval: 3000
+        interval: scrollIntervalMs
         repeat: true
-        onTriggered: {
-            if (focusRow < channels.length - 1) focusRow++
-            else focusRow = 0
-            channelList.positionViewAtIndex(focusRow, ListView.Contain)
-            progList.positionViewAtIndex(focusRow, ListView.Contain)
-        }
+        onTriggered: gridRoot.syncGuideRow()
+    }
+
+    onChannelsChanged: {
+        if (!interactive && channels.length > 0)
+            syncGuideRow()
+    }
+
+    Component.onCompleted: {
+        if (!interactive && channels.length > 0)
+            syncGuideRow()
     }
 
     focus: true

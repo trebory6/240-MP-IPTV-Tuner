@@ -6,6 +6,10 @@ The goal is to bring live IPTV playback into the same retro VCR-style frontend, 
 
 This is a personal roadmap and prototype unless it is later accepted into the main 240-MP project.
 
+### IPTV Tuner — bundled music (Pixabay)
+
+Default Guide and Weather channel background music is from [Pixabay](https://pixabay.com/music/). Per the [Pixabay Content License Summary](https://pixabay.com/service/license-summary/), tracks may be used and modified in this application. Attribution is appreciated but not required. Do not redistribute the bundled MP3 files as standalone downloads. Custom music folders are the user's responsibility. See `modules/iptv_tuner/assets/music/ATTRIBUTION.md`.
+
 ## IPTV Tuner Roadmap
 
 Development is currently focused on compatibility with [ErsatzTV Legacy](https://github.com/ErsatzTV/legacy), specifically its M3U playlist and XMLTV EPG output. Compatibility with other IPTV sources is not guaranteed at this time.

@@ -55,6 +55,7 @@ FocusScope {
     function saveAndContinue() {
         appCore.save_setting("com.240mp.iptv_tuner", "m3u_url", m3uUrl)
         appCore.save_setting("com.240mp.iptv_tuner", "epg_url", epgUrl)
+        iptvTunerBackend.startVirtualChannelClock()
         iptvTunerBackend.loadGuide()
         replaceWith("Tuner.qml", { startupChannel: iptvTunerBackend.startupChannelNumber() })
     }

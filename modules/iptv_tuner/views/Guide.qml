@@ -32,12 +32,17 @@ FocusScope {
         programmes: guideRoot.programmes
         theme: iptvTunerBackend.getGuideTheme()
         interactive: guideRoot.interactive
+        scrollIntervalMs: settings.guide_scroll_interval_ms || 3000
 
         onTuneChannel: function(ch) {
             if (!ch) return
             if (ch.isVirtual) return
+            iptvTunerBackend.onVirtualChannelTuneOut()
             navigateTo("Player.qml", { channel: ch, settings: settings }, {})
         }
-        onGoBack: guideRoot.goBack()
+        onGoBack: {
+            iptvTunerBackend.onVirtualChannelTuneOut()
+            guideRoot.goBack()
+        }
     }
 }

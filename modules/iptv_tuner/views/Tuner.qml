@@ -35,6 +35,7 @@ FocusScope {
     }
 
     function tuneToNumber(num) {
+        iptvTunerBackend.onVirtualChannelTuneOut()
         var ch = iptvTunerBackend.resolveChannel(num)
         if (!ch || Object.keys(ch).length === 0) {
             showBlank(num)
@@ -47,10 +48,12 @@ FocusScope {
 
         if (ch.isVirtual) {
             if (ch.virtualType === "guide") {
+                iptvTunerBackend.onVirtualChannelTuneIn("guide")
                 navigateTo("Guide.qml", { channel: ch, programmes: programmes, channels: channels }, {})
                 return
             }
             if (ch.virtualType === "weather") {
+                iptvTunerBackend.onVirtualChannelTuneIn("weather")
                 navigateTo("Weather.qml", { channel: ch }, {})
                 return
             }

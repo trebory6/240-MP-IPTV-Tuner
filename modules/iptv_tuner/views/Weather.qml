@@ -7,17 +7,21 @@ FocusScope {
     property var navParams: ({})
     signal goBack()
 
-    property var weatherData: ({})
+    property var weatherData: iptvTunerBackend.getWeatherData()
     property var settings: iptvTunerBackend.moduleSettings()
 
     Connections {
         target: iptvTunerBackend
         function onWeatherReady(data) { weatherData = data }
-        function onLoadFailed(msg) { weatherData = { error: msg } }
+        function onLoadFailed(msg) {
+            if (!weatherData || Object.keys(weatherData).length === 0)
+                weatherData = { error: msg }
+        }
     }
 
-    Component.onCompleted: {
-        iptvTunerBackend.refreshWeather()
+    function goBackFromWeather() {
+        iptvTunerBackend.onVirtualChannelTuneOut()
+        weatherRoot.goBack()
     }
 
     Rectangle {
@@ -70,7 +74,7 @@ FocusScope {
     focus: true
     Keys.onPressed: function(event) {
         if (event.key === Qt.Key_Escape || event.key === Qt.Key_Backspace) {
-            goBack()
+            goBackFromWeather()
             event.accepted = true
         }
     }

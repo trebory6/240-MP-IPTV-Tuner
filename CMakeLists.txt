@@ -33,6 +33,7 @@ add_executable(240mp
     src/modules/iptv_tuner/ChannelRegistry.cpp
     src/modules/iptv_tuner/EpgIndex.cpp
     src/modules/iptv_tuner/WeatherClient.cpp
+    src/modules/iptv_tuner/ChannelMusicPlayer.cpp
     src/player/MpvController.cpp
     $<$<BOOL:${APPLE}>:src/macos_utils.mm>
 )
