@@ -43,7 +43,10 @@ public:
                                   const QString &plexToken = {},
                                   bool muteAudio = false,
                                   const QString &oscMode = {},
-                                  bool shuffle = false);
+                                  bool shuffle = false,
+                                  bool autoZoomWidescreen = false,
+                                  int connectTimeoutSec = 0,
+                                  int maxBitrateMbps = 0);
     Q_INVOKABLE void stop();
     Q_INVOKABLE void seekTo(int positionMs);
     Q_INVOKABLE void sendKey(const QString &key);

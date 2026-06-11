@@ -1,0 +1,58 @@
+---
+description: TV Guide / Prevue Channel UI patterns for IPTV Tuner QML views
+globs: modules/iptv_tuner/**/*.qml
+alwaysApply: false
+---
+
+# IPTV Guide UI (Prevue / TV Guide Channel)
+
+Visual references: `cursor_dev_files/visual_inspo/Guide_Channel/`. Aim for a **1990s cable TV Guide Channel** feel — scrolling grid, channel logos, time blocks, current-program highlight.
+
+## Layout principles
+
+- Size everything with `root.sh` / `root.sw`; mind CRT overscan (safe margins ~12.5% like other modules).
+- Use app theme colors from `Main.qml` (`root.primaryColor`, `accentColor`, etc.) unless `guide_theme` overrides.
+- Channel logos from M3U `tvg-logo` / XMLTV `<icon>`; cache images locally in the data dir.
+- Show channel number (`tvg-chno`) + name; programme title, sub-title, time range.
+- Time axis: align programme blocks to start/stop from XMLTV; scroll horizontally through the schedule.
+
+## Guide modes
+
+| Mode | Behavior |
+|---|---|
+| **Passive** | Auto-scroll like a broadcast Guide Channel; minimal input (exit only, or OK to pause scroll) |
+| **Interactive** | D-pad moves focus across channel rows and time slots; Enter tunes channel |
+
+Implement both behind a `guide_mode` setting; share the same data model.
+
+## Remote navigation
+
+Required keys on every guide screen:
+
+- **Up/Down** — change channel row (interactive) or speed scroll (passive)
+- **Left/Right** — move time focus or scroll timeline
+- **Enter** — tune selected channel → navigate to `Player.qml`
+- **Escape / Backspace** — `goBack()`
+
+Channel list (`Channels.qml`) can be a simpler vertical `ListView` as an alternate entry point.
+
+## Channel transitions (analog style)
+
+When changing channels from the guide or a channel-up/down action:
+
+1. Brief QML overlay (static/snow/fade) **before** calling `mpvController.loadAndPlay` with the new URL.
+2. Keep transition duration short (~300–800 ms) so tuning feels snappy on Pi 4.
+3. Do not block the UI thread on network I/O during the effect.
+
+## Weather Channel (future)
+
+References: `cursor_dev_files/visual_inspo/Weather_Channel/`. Possible approaches:
+
+- Dedicated `Weather.qml` view in the module router
+- RetroCast integration or a custom QML template with local/API weather data
+- Same remote-nav and sizing rules as the guide
+
+## Reuse
+
+- `import Components` → `AppBar` where a title bar fits (channel list); full-screen guide may omit it.
+- Do not duplicate `MpvController` logic in QML — playback stays in `Player.qml`.

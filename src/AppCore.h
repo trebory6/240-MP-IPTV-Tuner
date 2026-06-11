@@ -35,6 +35,7 @@ public:
     Q_INVOKABLE QVariant get_installed_modules();
     Q_INVOKABLE QVariantMap getCustomColorScheme() const;
     Q_INVOKABLE QVariantList listDirectories(const QString &path);
+    Q_INVOKABLE QVariantList listImageFiles(const QString &path);
     Q_INVOKABLE QString parentDirectory(const QString &path);
     Q_INVOKABLE QString homePath();
     Q_INVOKABLE QString get_module_auth_state(const QString &moduleId);

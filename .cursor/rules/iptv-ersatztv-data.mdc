@@ -1,0 +1,56 @@
+---
+description: ErsatzTV Legacy M3U and XMLTV parsing expectations for IPTV Tuner
+globs: modules/iptv_tuner/**/*,src/modules/iptv_tuner/**/*
+alwaysApply: false
+---
+
+# ErsatzTV Legacy Data Formats
+
+Target **ErsatzTV Legacy** M3U + XMLTV output first. Sample files: `cursor_dev_files/sample_resources/`.
+
+## M3U (`channels.m3u`)
+
+- Header: `#EXTM3U` with `url-tvg` / `x-tvg-url` pointing at the XMLTV URL.
+- Each channel = `#EXTINF` line + URL line on the next line.
+- Key EXTINF attributes (parse all; some channels use decimal numbers like `57.5`):
+  - `tvg-id` — **join key** to XMLTV `<channel id>` and `<programme channel>`
+  - `tvg-chno` / `channel-number` — display/sort channel number
+  - `tvg-name` — short name; display name also appears after the comma
+  - `tvg-logo` — channel logo URL
+  - `group-title` — category (e.g. "Nostalgia Networks", "24/7 TV Shows")
+  - `channel-id` / `CUID` — ErsatzTV internal IDs (optional for UI)
+- Stream URL: HTTP(S) `.ts` endpoint (e.g. `…/iptv/channel/3.ts`).
+
+```text
+#EXTINF:0 tvg-id="C3.147.ersatztv.org" tvg-chno="3" tvg-name="UPN" …, UPN
+https://example/iptv/channel/3.ts
+```
+
+## XMLTV (`xmltv.xml`)
+
+- Root: `<tv generator-info-name="ersatztv">` — often **minified** (few newlines); use a streaming XML parser (`QXmlStreamReader`), not line-based parsing.
+- `<channel id="…">` — `id` matches M3U `tvg-id`.
+  - Multiple `<display-name>` entries (number + name variants).
+  - `<icon src="…"/>` for logo.
+- `<programme start="…" stop="…" channel="…">`:
+  - Times: `YYYYMMDDhhmmss ±ZZZZ` (e.g. `20260611034350 -0700`).
+  - `<title>`, optional `<sub-title>`, `<desc>` (HTML entities like `&#39;`).
+  - `<category lang="en">` — multiple genres.
+  - `<icon src="…"/>` and `<image type="poster" …>` for artwork.
+
+## Backend design notes
+
+- Fetch M3U + XMLTV via `QNetworkAccessManager` (see `PlexBackend` patterns).
+- Cache parsed results in the data dir; refresh on demand or via a manifest `action` setting.
+- Join channels ↔ programmes on `tvg-id` / `channel id`.
+- Sort channels by numeric `tvg-chno` (parse as `double` for values like `201.2`).
+- EPG URL: read from M3U header `url-tvg` when present; allow override in settings.
+- For local dev, support `file://` paths to `cursor_dev_files/sample_resources/`.
+
+## Settings gap
+
+Existing manifest types have no URL/text field. Options:
+1. Add a `text` setting type to the shell (preferred for M3U/EPG URLs), or
+2. Use `directory_browser` for local file paths during development only.
+
+Do not assume generic IPTV M3U/XMLTV dialects until ErsatzTV passes.

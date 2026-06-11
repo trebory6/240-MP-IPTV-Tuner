@@ -1,0 +1,44 @@
+---
+description: 240-MP shell conventions for QML views and C++ backends (all modules)
+globs: "**/*.{qml,cpp,h}"
+alwaysApply: false
+---
+
+# 240-MP QML & C++ Conventions
+
+Apply these when editing any module or shell code in this fork.
+
+## QML views
+
+```qml
+FocusScope {
+    id: itemsRoot
+    property var navParams: ({})
+    property var navListState: navParams.navListState || ({})
+    signal navigateTo(string path, var params, var listState)
+    signal goBack()
+    // Escape/Backspace → goBack()
+    // Sizes: root.sh, root.sw — never literal pixels
+}
+```
+
+- Module router `Root.qml`: `id: moduleRoot`; only `goBack()` leaves the module.
+- `moduleName` / `moduleIcon` from `appCore.get_module_info("com.240mp.<id>")`.
+- List views restore `currentIndex` from `navListState` on `Component.onCompleted`.
+
+## C++ backends
+
+- `Q_INVOKABLE` for QML-called slots; `signals:` for async results.
+- Persist state via JSON in the data dir; read settings in the constructor.
+- `registerModule` auto-wires (exact signatures): `dynamicOptionsReady`, `authStateChanged`, `onSettingChanged`.
+
+## Config
+
+```qml
+appCore.get_setting("com.240mp.iptv_tuner", "m3u_url")
+appCore.save_setting("com.240mp.iptv_tuner", "guide_mode", "passive")
+```
+
+## Scope discipline in this fork
+
+Prefer module-only diffs. Touch `AppCore`, `MpvController`, or `Main.qml` only when the IPTV feature genuinely needs shell support (e.g. URL setting type, mpv zoom flags).

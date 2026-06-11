@@ -13,6 +13,7 @@
 #include "modules/local_files/LocalFilesBackend.h"
 #include "modules/plex/PlexBackend.h"
 #include "modules/ambient_mode/AmbientModeBackend.h"
+#include "modules/iptv_tuner/IptvTunerBackend.h"
 #include "player/MpvController.h"
 #ifdef Q_OS_MAC
 #include "macos_utils.h"
@@ -77,6 +78,7 @@ int main(int argc, char *argv[]) {
     LocalFilesBackend   localFiles(appRoot, dataRoot);
     PlexBackend         plexBackend(appRoot, dataRoot);
     AmbientModeBackend  ambientMode(dataRoot);
+    IptvTunerBackend    iptvTuner(appRoot, dataRoot);
     MpvController       mpvController(appRoot);
 
     // Each module backend is wired in one call: stored for action routing, exposed to QML
@@ -86,6 +88,7 @@ int main(int argc, char *argv[]) {
     appCore.registerModule("com.240mp.local_files",  "localFilesBackend",  &localFiles,  ctx);
     appCore.registerModule("com.240mp.plex",         "plexBackend",        &plexBackend, ctx);
     appCore.registerModule("com.240mp.ambient_mode", "ambientModeBackend", &ambientMode, ctx);
+    appCore.registerModule("com.240mp.iptv_tuner",   "iptvTunerBackend",   &iptvTuner,   ctx);
 
     ctx->setContextProperty("appCore",       &appCore);
     ctx->setContextProperty("mpvController", &mpvController);

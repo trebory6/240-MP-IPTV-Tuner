@@ -1,6 +1,7 @@
 #include "AppCore.h"
 #include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <QUrl>
@@ -320,6 +321,23 @@ QVariantList AppCore::listDirectories(const QString &path) {
     if (!dir.exists()) return result;
     const QStringList names = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden, QDir::Name);
     for (const QString &name : names) {
+        QVariantMap item;
+        item["name"] = name;
+        item["path"] = dir.absoluteFilePath(name);
+        result.append(item);
+    }
+    return result;
+}
+
+QVariantList AppCore::listImageFiles(const QString &path) {
+    QVariantList result;
+    QDir dir(path);
+    if (!dir.exists()) return result;
+    static const QStringList kImageExts = { "png", "jpg", "jpeg", "svg", "gif", "webp" };
+    const QStringList names = dir.entryList(QDir::Files | QDir::Readable, QDir::Name);
+    for (const QString &name : names) {
+        const QString ext = QFileInfo(name).suffix().toLower();
+        if (!kImageExts.contains(ext)) continue;
         QVariantMap item;
         item["name"] = name;
         item["path"] = dir.absoluteFilePath(name);

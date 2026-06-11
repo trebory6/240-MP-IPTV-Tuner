@@ -27,6 +27,12 @@ add_executable(240mp
     src/modules/local_files/LocalFilesBackend.cpp
     src/modules/plex/PlexBackend.cpp
     src/modules/ambient_mode/AmbientModeBackend.cpp
+    src/modules/iptv_tuner/IptvTunerBackend.cpp
+    src/modules/iptv_tuner/M3uParser.cpp
+    src/modules/iptv_tuner/XmltvParser.cpp
+    src/modules/iptv_tuner/ChannelRegistry.cpp
+    src/modules/iptv_tuner/EpgIndex.cpp
+    src/modules/iptv_tuner/WeatherClient.cpp
     src/player/MpvController.cpp
     $<$<BOOL:${APPLE}>:src/macos_utils.mm>
 )

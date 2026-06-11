@@ -1,0 +1,9 @@
+{
+  "name": "tv_guide",
+  "background": "#000000",
+  "rowAlt": "#333333",
+  "rowPrimary": "#1a1a1a",
+  "text": "#FFFFFF",
+  "accent": "#FFD900",
+  "header": "#FFD900"
+}

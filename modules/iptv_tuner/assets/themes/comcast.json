@@ -1,0 +1,9 @@
+{
+  "name": "comcast",
+  "background": "#12012B",
+  "rowAlt": "#7836B5",
+  "rowPrimary": "#12012B",
+  "text": "#FFFFFF",
+  "accent": "#00E5FF",
+  "header": "#D48BFF"
+}

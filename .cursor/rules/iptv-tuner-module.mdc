@@ -1,0 +1,80 @@
+---
+description: IPTV Tuner module structure, backend, and playback patterns
+globs: modules/iptv_tuner/**/*,src/modules/iptv_tuner/**/*
+alwaysApply: false
+---
+
+# IPTV Tuner Module Structure
+
+```
+modules/iptv_tuner/
+  manifest.json              # id: com.240mp.iptv_tuner
+  assets/images/logo.svg
+  views/
+    Root.qml                 # router (required)
+    Channels.qml             # channel list / tuner
+    Guide.qml                # TV Guide / Prevue-style EPG
+    Player.qml               # mpv hand-off for live streams
+    Weather.qml              # future — Weather Channel screen
+
+src/modules/iptv_tuner/
+  IptvTunerBackend.h/.cpp    # M3U/XMLTV fetch, parse, cache, signals to QML
+```
+
+## manifest.json (planned settings)
+
+| key | type | purpose |
+|---|---|---|
+| `enabled` | toggle | Module on/off |
+| `m3u_url` | text* | M3U playlist URL or file path |
+| `epg_url` | text* | XMLTV URL override (optional if M3U header has `url-tvg`) |
+| `guide_mode` | list_single | `passive` / `interactive` |
+| `guide_theme` | list_single | Guide visual theme |
+| `auto_zoom_widescreen` | toggle | mpv auto-zoom 16:9 content |
+| `refresh_guide` | action | Re-fetch M3U + EPG |
+
+\*Requires `text` setting type in shell, or use `directory_browser` for local files until added.
+
+## C++ backend (`IptvTunerBackend`)
+
+Follow `PlexBackend` conventions:
+
+- `QObject` subclass; `Q_INVOKABLE` slots for QML; `signals:` for async results.
+- HTTP via `QNetworkAccessManager` on the main thread.
+- Optional `onSettingChanged(QString, QString, QVariant)` for settings reactions.
+- Emit parsed data as `QVariantList` of `QVariantMap` objects QML can bind to.
+
+Suggested signals:
+
+```cpp
+void channelsLoaded(const QVariant &channels);
+void guideDataReady(const QVariant &channels, const QVariant &programmes);
+void loadFailed(const QString &message);
+void dynamicOptionsReady(const QString &key, const QVariant &options); // if needed
+```
+
+Suggested invokables: `loadChannels()`, `loadGuide()`, `getChannelStreamUrl(QString tvgId)`.
+
+## Live playback (`Player.qml`)
+
+Hand off to mpv — pattern from `modules/local_files/views/Player.qml` and `ambient_mode/views/Player.qml`:
+
+- Live `.ts` streams: `mpvController.loadAndPlay(streamUrl, 0.0, 0, -1)` — no resume offset.
+- Forward remote keys to mpv via `mpvController.sendKey()` while playing.
+- On `playbackFinished` / user exit → `goBack()` to channel list or guide.
+- Channel change: stop current mpv session, load new URL (analog transition UI wraps this in QML).
+- **Auto-zoom:** extend `MpvController::loadAndPlay` or pass mpv flags for widescreen (e.g. `--video-zoom`, `--panscan`) when `auto_zoom_widescreen` is ON — keep logic in one place.
+
+## QML navigation
+
+Follow `ARCHITECTURE.md` exactly:
+
+- `Root.qml`: `id: moduleRoot`, `navigateTo` / `navigateBack`, `goBack()` exits module.
+- Views: `FocusScope`, `property var navParams`, signals not direct router calls.
+- Pass channel objects via `navParams` to `Player.qml` and `Guide.qml`.
+
+## CMake / main.cpp checklist
+
+1. Add `src/modules/iptv_tuner/IptvTunerBackend.cpp` to `CMakeLists.txt`.
+2. `#include` + construct in `main.cpp`.
+3. `registerModule("com.240mp.iptv_tuner", "iptvTunerBackend", …)`.

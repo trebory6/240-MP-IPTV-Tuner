@@ -97,7 +97,9 @@ void MpvController::loadAndPlay(const QString &url, float startSeconds,
                                  const QStringList &subFiles, bool loop,
                                  int playlistStart, float transcodeOffsetSec,
                                  const QString &plexToken, bool muteAudio,
-                                 const QString &oscMode, bool shuffle) {
+                                 const QString &oscMode, bool shuffle,
+                                 bool autoZoomWidescreen, int connectTimeoutSec,
+                                 int maxBitrateMbps) {
     if (m_process) {
         m_process->disconnect();
         if (m_process->state() != QProcess::NotRunning) {
@@ -193,6 +195,13 @@ void MpvController::loadAndPlay(const QString &url, float startSeconds,
     // hosts). Disable TLS verification only for plex.direct playback URLs.
     if (QUrl(url).host().endsWith(QStringLiteral(".plex.direct")))
         args << QStringLiteral("--tls-verify=no");
+
+    if (autoZoomWidescreen)
+        args << QStringLiteral("--panscan=1.0");
+    if (connectTimeoutSec > 0)
+        args << QString("--network-timeout=%1").arg(connectTimeoutSec);
+    if (maxBitrateMbps > 0)
+        args << QString("--hls-bitrate=max") << QString("--cache-secs=3");
 
     m_process = new QProcess(this);
     m_process->setProcessChannelMode(QProcess::MergedChannels);

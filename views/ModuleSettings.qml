@@ -74,6 +74,25 @@ FocusScope {
             return saved !== "" ? saved : "Default"
         }
 
+        if (type === "text") {
+            var tv = currentValues[key] || item.default || ""
+            if (item.masked && tv.length > 0) return "****"
+            return tv !== "" ? tv : "---"
+        }
+
+        if (type === "number") {
+            var nv = currentValues[key]
+            if (nv === undefined || nv === null) nv = item.default !== undefined ? item.default : 0
+            return String(nv)
+        }
+
+        if (type === "image_picker") {
+            var ip = currentValues[key] || ""
+            if (ip === "") return "NONE"
+            var slash = Math.max(ip.lastIndexOf("/"), ip.lastIndexOf("\\"))
+            return slash >= 0 ? ip.substring(slash + 1) : ip
+        }
+
         return ""
     }
 
@@ -120,6 +139,18 @@ FocusScope {
                 currentValues = u2
                 appCore.save_setting(moduleId, item.key, opts[ni])
             }
+            settingsList.forceLayout()
+        } else if (item.type === "number") {
+            var step = item.step !== undefined ? item.step : 1
+            var minV = item.min !== undefined ? item.min : 0
+            var maxV = item.max !== undefined ? item.max : 999999
+            var curN = currentValues[item.key]
+            if (curN === undefined || curN === null) curN = item.default !== undefined ? item.default : 0
+            var newN = Math.max(minV, Math.min(maxV, curN + direction * step))
+            var uN = Object.assign({}, currentValues)
+            uN[item.key] = newN
+            currentValues = uN
+            appCore.save_setting(moduleId, item.key, newN)
             settingsList.forceLayout()
         }
     }
@@ -214,6 +245,20 @@ FocusScope {
                     settingKey: item.key,
                     currentPath: savedPath !== "" ? savedPath : appCore.homePath()
                 }, { currentIndex: settingsList.currentIndex })
+            } else if (item.type === "text") {
+                moduleSettingsRoot.navigateTo("views/TextEntry.qml", {
+                    moduleId: moduleSettingsRoot.moduleId,
+                    settingKey: item.key,
+                    settingLabel: item.label,
+                    initialValue: currentValues[item.key] || item.default || "",
+                    masked: item.masked || false,
+                    mode: item.input_mode || "text"
+                }, { currentIndex: settingsList.currentIndex })
+            } else if (item.type === "image_picker") {
+                moduleSettingsRoot.navigateTo("views/ImagePicker.qml", {
+                    moduleId: moduleSettingsRoot.moduleId,
+                    settingKey: item.key
+                }, { currentIndex: settingsList.currentIndex })
             }
         }
 
@@ -256,7 +301,7 @@ FocusScope {
 
                     // Left arrow for cycled types
                     Text {
-                        visible: modelData.type === "toggle" || modelData.type === "list_single"
+                        visible: modelData.type === "toggle" || modelData.type === "list_single" || modelData.type === "number"
                         text: "\u25C4"
                         color: settingsList.currentIndex === index ? root.surfaceColor : root.tertiaryColor
                         font.family: root.globalFont
@@ -269,7 +314,7 @@ FocusScope {
                     // Current value text (cycled types + directory_browser) with marquee scroll
                     Item {
                         id: valueClip
-                        visible: modelData.type === "toggle" || modelData.type === "list_single" || modelData.type === "directory_browser"
+                        visible: modelData.type === "toggle" || modelData.type === "list_single" || modelData.type === "number" || modelData.type === "directory_browser" || modelData.type === "text" || modelData.type === "image_picker"
                         width: Math.min(valueText.implicitWidth, root.sw * 0.35)
                         height: parent.height
                         clip: true

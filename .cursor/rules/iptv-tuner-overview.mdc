@@ -1,0 +1,74 @@
+---
+description: IPTV Tuner fork — project identity, roadmap, and development constraints
+alwaysApply: true
+---
+
+# IPTV Tuner (240-MP Fork)
+
+This repo is a **personal fork of [240-MP](https://github.com/anthonycaccese/240-MP)** used to plan and build an experimental **IPTV Tuner** module that simulates 1990s cable-TV watching (live channels, scrolling TV Guide, CRT-friendly UI).
+
+The module does **not exist yet**. All new work belongs under `modules/iptv_tuner/` (QML) and `src/modules/iptv_tuner/` (C++ backend). Minimize changes to the upstream shell unless required (e.g. a new `manifest.json` setting type for URL fields).
+
+## Stack & dependencies
+
+| Layer | Technology |
+|---|---|
+| App shell | Qt 6 (Core, Gui, Quick, Qml, Network, Svg), C++17 |
+| Playback | **mpv** subprocess via `MpvController` — not libmpv |
+| Linux/RPi | libdrm (EGLFS ↔ mpv framebuffer hand-off) |
+| Crypto | OpenSSL (Plex only today; IPTV may not need it) |
+| Targets | Raspberry Pi 4 (480i CRT / EGLFS), macOS ARM |
+
+Build: see `BUILDING.md`. Run: `APP_ROOT=$(pwd) ./build/240mp`.
+
+## Authoritative docs (read before coding)
+
+| Topic | File |
+|---|---|
+| Module anatomy, `registerModule`, QML nav contract | `ARCHITECTURE.md` |
+| Contribution principles, remote/CRT requirements | `CONTRIBUTING.md` |
+| Quick reference | `CLAUDE.md` |
+
+**Reference modules:** `plex` (HTTP backend), `local_files` (filesystem + mpv `Player.qml`), `ambient_mode` (continuous loop playback).
+
+## Roadmap (priority order)
+
+1. M3U playlist + XMLTV EPG integration (**ErsatzTV Legacy first**)
+2. Live IPTV channel playback (mpv hand-off)
+3. Prevue Channel / TV Guide Channel-inspired guide view
+4. Passive scrolling + interactive selection modes
+5. Guide theme support (may extend beyond app `color_scheme`)
+6. Retro Weather Channel screen (RetroCast or custom template) — optional
+7. Remote-control navigation (up/down/left/right/enter/esc only)
+8. Analog-style channel transitions
+9. Auto-zoom widescreen streams (mpv video-zoom / panscan)
+
+Compatibility with other IPTV sources is **not** a goal until ErsatzTV Legacy works end-to-end.
+
+## Local dev assets (gitignored)
+
+`cursor_dev_files/` is on disk but gitignored. Use it for development:
+
+- `sample_resources/channels.m3u` — ErsatzTV M3U sample
+- `sample_resources/xmltv.xml` — ErsatzTV XMLTV sample (~minified single-line XML)
+- `visual_inspo/Guide_Channel/` — Prevue / TV Guide visual references
+- `visual_inspo/Weather_Channel/` — Weather Channel references
+
+Do not commit private URLs or credentials from samples into the repo.
+
+## Hard constraints
+
+- **Browse & hand-off:** IPTV playback goes through `mpvController.loadAndPlay()` — never embed a video player in QML.
+- **Remote-only UI:** No mouse-only interactions; Escape/Backspace exits screens.
+- **Responsive sizing:** Use `root.sh` / `root.sw` — never hardcoded pixel sizes.
+- **Self-contained module:** Keep IPTV code in `modules/iptv_tuner/` + `src/modules/iptv_tuner/`.
+- **No tracking:** Network calls only to the user's configured IPTV server; persist state in the data dir only.
+- **Stable settings keys:** Module ID `com.240mp.iptv_tuner`; use `appCore.save_setting` / `get_setting`.
+
+## Planned module registration
+
+When the C++ backend lands, add **one** line in `src/main.cpp` and the `.cpp` in `CMakeLists.txt`:
+
+```cpp
+appCore.registerModule("com.240mp.iptv_tuner", "iptvTunerBackend", &iptvTuner, ctx);
+```
